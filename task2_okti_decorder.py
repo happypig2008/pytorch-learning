@@ -1,0 +1,133 @@
+# 姓名：周倩羽
+# 学号：202600293
+# 程序说明：任务二 OKTI 图像解码器，第一阶段只读取文件头并解析尺寸
+
+def read_header(filename):
+    """
+    读取 OKTI 文件的前两行，检查是否为 OKTI 格式并解析宽高。
+    参数 filename: 要读取的文件名
+    返回值: 宽和高（整数元组），若出错则返回 None
+    """
+    try:
+        # 使用 with open 自动关闭文件
+        with open(filename, "r") as f:
+            # 读取第一行并去除末尾换行符
+            first_line = f.readline().strip()
+
+            # 检查第一行是否为 okti
+            if first_line != "okti":
+                print(f"错误：文件 {filename} 不是 OKTI 格式，第一行是：{first_line}")
+                return None
+
+            # 读取第二行
+            second_line = f.readline().strip()
+            if not second_line:
+                print("错误：文件缺少尺寸信息（第二行）。")
+                return None
+
+            # 拆分第二行，按空格分割
+            parts = second_line.split()
+            if len(parts) != 2:
+                print(f"错误：尺寸信息格式错误，应该有两个数字，实际为：{second_line}")
+                return None
+
+            width = int(parts[0])
+            height = int(parts[1])
+
+            # 检查宽高合法性
+            if width <= 0 or height <= 0:
+                print(f"错误：图片尺寸无效，宽={width}, 高={height}，必须大于0。")
+                return None
+
+            print(f"成功读取文件头！")
+            print(f"格式：OKTI")
+            print(f"尺寸：{width} x {height}")
+
+            return width, height
+
+    except FileNotFoundError:
+        # 文件不存在报错
+        print(f"错误：找不到文件 {filename}，请检查文件路径。")
+        return None
+
+
+def parse_pixel_p(line):
+    """
+    解析 p 类型像素。
+    参数 line: 形如 "pff0000" 的字符串
+    返回值: 包含 (红, 绿, 蓝) 的元组
+    """
+    # line[1:3] 取第2、3个字符，即 "ff"
+    # line[3:5] 取第4、5个字符，即 "00"
+    # line[5:7] 取第6、7个字符，即 "00"
+    r_hex = line[1:3]
+    g_hex = line[3:5]
+    b_hex = line[5:7]
+
+    # int(字符串, 16) 把十六进制字符串转为十进制整数
+    r = int(r_hex, 16)
+    g = int(g_hex, 16)
+    b = int(b_hex, 16)
+
+    return r, g, b
+
+def main():
+    """主函数，测试读取 small.okti"""
+    filename = "small.okti"
+    print(f"尝试读取文件：{filename}")
+
+    result = read_header(filename)
+
+    if result is not None:
+        w, h = result
+        print(f"接下来应该解析 {w * h} 个像素的数据。")
+        print("第一阶段测试通过！")
+    else:
+        print("第一阶段测试失败。")
+
+
+if __name__ == "__main__":
+    def main():
+        """主函数，读取并解析所有像素"""
+        filename = "small.okti"
+        print(f"尝试读取文件：{filename}")
+
+        # 先读文件头，获取宽高
+        result = read_header(filename)
+
+        if result is not None:
+            w, h = result
+            total_pixels = w * h
+            print(f"预计需要解析 {total_pixels} 个像素。")
+
+            # 重新打开文件，跳过前两行（okti和尺寸行），开始读取像素
+            with open(filename, "r") as f:
+                # 跳过第一行和第二行
+                f.readline()
+                f.readline()
+
+                pixel_count = 0
+
+                # 循环读取每一行像素数据
+                for line in f:
+                    line = line.strip()  # 去掉换行符
+                    if not line:  # 如果是空行，跳过
+                        continue
+
+                    # 判断这一行的第一个字符是什么
+                    pixel_type = line[0]
+
+                    if pixel_type == "p":
+                        # 调用刚才写的 parse_pixel_p 解析颜色
+                        r, g, b = parse_pixel_p(line)
+                        pixel_count += 1
+                        print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+                    else:
+                        print(f"暂不支持的类型：{pixel_type}")
+                        return
+
+                print(f"解析完毕，共处理 {pixel_count} 个像素。")
+
+
+    if __name__ == "__main__":
+        main()
