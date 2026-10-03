@@ -70,6 +70,23 @@ def parse_pixel_p(line):
     b = int(b_hex, 16)
 
     return r, g, b
+def parse_pixel_d(line, prev_r, prev_g, prev_b):
+    """
+    解析 d 类型像素（差值）。
+    """
+    r_hex = line[1:3]
+    g_hex = line[3:5]
+    b_hex = line[5:7]
+
+    r_diff = int(r_hex, 16) - 8
+    g_diff = int(g_hex, 16) - 8
+    b_diff = int(b_hex, 16) - 8
+
+    current_r = prev_r + r_diff
+    current_g = prev_g + g_diff
+    current_b = prev_b + b_diff
+
+    return current_r, current_g, current_b
 
 def main():
     """主函数，测试读取 small.okti"""
@@ -107,7 +124,7 @@ if __name__ == "__main__":
                 f.readline()
 
                 pixel_count = 0
-
+                prev_r, prev_g, prev_b = 0, 0, 0
                 # 循环读取每一行像素数据
                 for line in f:
                     line = line.strip()  # 去掉换行符
@@ -122,9 +139,21 @@ if __name__ == "__main__":
                         r, g, b = parse_pixel_p(line)
                         pixel_count += 1
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+
+
+                    elif pixel_type == "d":
+
+                        # 调用刚刚写的 parse_pixel_d  <-- 注释也要缩进！
+
+                        r, g, b = parse_pixel_d(line, prev_r, prev_g, prev_b)
+
+                        pixel_count += 1
+
+                        print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
                     else:
                         print(f"暂不支持的类型：{pixel_type}")
                         return
+                    prev_r, prev_g, prev_b = r, g, b
 
                 print(f"解析完毕，共处理 {pixel_count} 个像素。")
 
