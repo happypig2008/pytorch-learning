@@ -2,6 +2,8 @@
 # 学号：202600293
 # 程序说明：任务二 OKTI 图像解码器，第一阶段只读取文件头并解析尺寸
 
+from PIL import Image
+
 def read_header(filename):
     """
     读取 OKTI 文件的前两行，检查是否为 OKTI 格式并解析宽高。
@@ -88,15 +90,32 @@ def parse_pixel_d(line, prev_r, prev_g, prev_b):
 
     return current_r, current_g, current_b
 
+def parse_pixel_r(line):
+    """
+    解析 r 或 R 类型像素。
+    参数 line: 形如 "r2" 或 "R20" 的字符串
+    返回值: 需要额外复制的次数（整数）
+    """
+    if line[0] == "r":
+        # 小写 r，后面只有 1 位十六进制数字
+        count = int(line[1:2], 16)
+    else:
+        # 大写 R，后面有 2 位十六进制数字
+        count = int(line[1:3], 16)
+
+    return count
+
 def main():
-    """主函数，测试读取 small.okti"""
-    filename = "small.okti"
+    """主函数，测试读取"""
+    filename = "test_r. okti"
     print(f"尝试读取文件：{filename}")
 
     result = read_header(filename)
 
     if result is not None:
         w, h = result
+        # 创建一个 w 宽 h 高的黑色画布
+        img = Image.new("RGB", (w, h), (0, 0, 0))
         print(f"接下来应该解析 {w * h} 个像素的数据。")
         print("第一阶段测试通过！")
     else:
@@ -114,6 +133,7 @@ if __name__ == "__main__":
 
         if result is not None:
             w, h = result
+            img = Image.new("RGB", (w, h), (0, 0, 0))
             total_pixels = w * h
             print(f"预计需要解析 {total_pixels} 个像素。")
 
@@ -137,8 +157,14 @@ if __name__ == "__main__":
                     if pixel_type == "p":
                         # 调用刚才写的 parse_pixel_p 解析颜色
                         r, g, b = parse_pixel_p(line)
+                        # 计算当前像素在画布上的坐标 (x, y)
+                        x = pixel_count % w
+                        y = pixel_count // w
+                        # 把颜色画上去
+                        img.putpixel((x, y), (r, g, b))
                         pixel_count += 1
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+
 
 
                     elif pixel_type == "d":
@@ -150,10 +176,35 @@ if __name__ == "__main__":
                         pixel_count += 1
 
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+                        # 计算当前像素在画布上的坐标 (x, y)
+                        x = pixel_count % w
+                        y = pixel_count // w
+                        # 把颜色画上去
+                        img.putpixel((x, y), (r, g, b))
+
+
+                    elif pixel_type in ["r", "R"]:
+                        # 1. 调用刚才写的函数，获取“额外复制”的次数
+                        count = parse_pixel_r(line)
+
+                        # 2. 循环复制上一个像素
+                        for _ in range(count):
+                            pixel_count += 1
+                            # 注意：这里打印用的是 prev_r，因为颜色没有变
+                            print(f"像素 {pixel_count}: R={prev_r}, G={prev_g}, B={prev_b}")
+                            # 计算当前像素在画布上的坐标 (x, y)
+                            x = pixel_count % w
+                            y = pixel_count // w
+                            # 把颜色画上去
+                            img.putpixel((x, y), (r, g, b))
+
+                        r, g, b = prev_r, prev_g, prev_b
                     else:
                         print(f"暂不支持的类型：{pixel_type}")
                         return
                     prev_r, prev_g, prev_b = r, g, b
+                img.save("output.png")  # 把图片保存到文件
+                img.show()  # 弹出一个窗口显示图片
 
                 print(f"解析完毕，共处理 {pixel_count} 个像素。")
 
