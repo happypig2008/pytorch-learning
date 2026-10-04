@@ -105,6 +105,17 @@ def parse_pixel_r(line):
 
     return count
 
+def parse_pixel_i(line, colors):
+    """
+    解析 i 或 I 类型像素。
+    """
+    if line[0] == "i":
+        index = int(line[1:2], 16)
+    else:
+        index = int(line[1:3], 16)
+    return colors[index]
+
+
 def main():
     """主函数，测试读取"""
     filename = "test_r. okti"
@@ -125,7 +136,7 @@ def main():
 if __name__ == "__main__":
     def main():
         """主函数，读取并解析所有像素"""
-        filename = "test_r. okti"
+        filename = "small.okti"
         print(f"尝试读取文件：{filename}")
 
         # 先读文件头，获取宽高
@@ -145,6 +156,8 @@ if __name__ == "__main__":
 
                 pixel_count = 0
                 prev_r, prev_g, prev_b = 0, 0, 0
+                colors = [(0, 0, 0)]  # 历史颜色列表，初始为黑色
+
                 # 循环读取每一行像素数据
                 for line in f:
                     line = line.strip()  # 去掉换行符
@@ -201,10 +214,26 @@ if __name__ == "__main__":
 
 
                         r, g, b = prev_r, prev_g, prev_b
+
+
+                    elif pixel_type in ["i", "I"]:
+                        r, g, b = parse_pixel_i(line, colors)
+                        x = pixel_count % w
+                        y = pixel_count // w
+                        img.putpixel((x, y), (r, g, b))
+                        pixel_count += 1
+                        print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+
+
                     else:
                         print(f"暂不支持的类型：{pixel_type}")
                         return
                     prev_r, prev_g, prev_b = r, g, b
+                    # 更新历史颜色列表
+                    if (r, g, b) not in colors:
+                        colors.insert(0, (r, g, b))
+                        if len(colors) > 256:
+                            colors.pop()
                 img.save("output.png")  # 把图片保存到文件
                 img.show()  # 弹出一个窗口显示图片
 
