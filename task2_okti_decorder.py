@@ -76,9 +76,9 @@ def parse_pixel_d(line, prev_r, prev_g, prev_b):
     """
     解析 d 类型像素（差值）。
     """
-    r_hex = line[1:3]
-    g_hex = line[3:5]
-    b_hex = line[5:7]
+    r_hex = line[1:2]
+    g_hex = line[2:3]
+    b_hex = line[3:4]
 
     r_diff = int(r_hex, 16) - 8
     g_diff = int(g_hex, 16) - 8
@@ -125,7 +125,7 @@ def main():
 if __name__ == "__main__":
     def main():
         """主函数，读取并解析所有像素"""
-        filename = "small.okti"
+        filename = "test_r. okti"
         print(f"尝试读取文件：{filename}")
 
         # 先读文件头，获取宽高
@@ -172,15 +172,16 @@ if __name__ == "__main__":
                         # 调用刚刚写的 parse_pixel_d  <-- 注释也要缩进！
 
                         r, g, b = parse_pixel_d(line, prev_r, prev_g, prev_b)
-
-                        pixel_count += 1
-
-                        print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
                         # 计算当前像素在画布上的坐标 (x, y)
                         x = pixel_count % w
                         y = pixel_count // w
                         # 把颜色画上去
                         img.putpixel((x, y), (r, g, b))
+
+                        pixel_count += 1
+
+                        print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
+
 
 
                     elif pixel_type in ["r", "R"]:
@@ -189,14 +190,15 @@ if __name__ == "__main__":
 
                         # 2. 循环复制上一个像素
                         for _ in range(count):
-                            pixel_count += 1
-                            # 注意：这里打印用的是 prev_r，因为颜色没有变
-                            print(f"像素 {pixel_count}: R={prev_r}, G={prev_g}, B={prev_b}")
                             # 计算当前像素在画布上的坐标 (x, y)
                             x = pixel_count % w
                             y = pixel_count // w
                             # 把颜色画上去
                             img.putpixel((x, y), (r, g, b))
+                            pixel_count += 1
+                            # 注意：这里打印用的是 prev_r，因为颜色没有变
+                            print(f"像素 {pixel_count}: R={prev_r}, G={prev_g}, B={prev_b}")
+
 
                         r, g, b = prev_r, prev_g, prev_b
                     else:
