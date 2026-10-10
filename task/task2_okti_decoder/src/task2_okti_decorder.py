@@ -1,6 +1,7 @@
 # 姓名：周倩羽
 # 学号：202600293
 # 程序说明：任务二 OKTI 图像解码器，第一阶段只读取文件头并解析尺寸
+import os
 import sys
 from PIL import Image
 
@@ -118,7 +119,7 @@ def parse_pixel_i(line, colors):
 
 def main():
     """主函数，测试读取"""
-    filename = "test_r. okti"
+    filename = "../tests/valid/test_r. okti"
     print(f"尝试读取文件：{filename}")
 
     result = read_header(filename)
@@ -138,13 +139,32 @@ if __name__ == "__main__":
         # 获取命令行参数
         args = sys.argv
 
+        user_input = ""  # 先定义一个空变量，用来接用户输入
+
         if len(args) > 2:
             print("错误：参数过多，请只提供一个文件名。")
-            quit()
+            return
         elif len(args) == 2:
-            filename = args[1]  # 用户输入的文件名
+            user_input = args[1]  # 从命令行参数获取文件名
         else:
-            filename = input("请输入要打开的文件名：")
+            # 没有参数，用 input 提示输入
+            user_input = input("请输入要打开的 OKTI 文件名（例如 small.okti）：")
+
+        # 自动补全路径
+        # 判断用户输入的内容里，有没有斜杠或者反斜杠
+        if os.sep not in user_input and "/" not in user_input:
+            # 1. 先尝试去 valid 找
+            filename = os.path.join("..", "tests", "valid", user_input)
+            if not os.path.exists(filename):
+                # 2. 没找到，去 invalid 找
+                filename = os.path.join("..", "tests", "invalid", user_input)
+                if not os.path.exists(filename):
+                    # 3. 还没找到，干脆按用户输入的名字，在当前目录找找看
+                    filename = user_input
+        else:
+            # 用户带了路径，直接按用户的路径读
+            filename = user_input
+
         print(f"尝试读取文件：{filename}")
 
         # 先读文件头，获取宽高
