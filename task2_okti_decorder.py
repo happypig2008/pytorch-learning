@@ -1,7 +1,7 @@
 # 姓名：周倩羽
 # 学号：202600293
 # 程序说明：任务二 OKTI 图像解码器，第一阶段只读取文件头并解析尺寸
-
+import sys
 from PIL import Image
 
 def read_header(filename):
@@ -135,8 +135,16 @@ def main():
 
 if __name__ == "__main__":
     def main():
-        """主函数，读取并解析所有像素"""
-        filename = "small.okti"
+        # 获取命令行参数
+        args = sys.argv
+
+        if len(args) > 2:
+            print("错误：参数过多，请只提供一个文件名。")
+            quit()
+        elif len(args) == 2:
+            filename = args[1]  # 用户输入的文件名
+        else:
+            filename = input("请输入要打开的文件名：")
         print(f"尝试读取文件：{filename}")
 
         # 先读文件头，获取宽高
@@ -159,7 +167,11 @@ if __name__ == "__main__":
                 colors = [(0, 0, 0)]  # 历史颜色列表，初始为黑色
 
                 # 循环读取每一行像素数据
+
+                line_num = 2
+
                 for line in f:
+                    line_num += 1  # 记录当前是第几行
                     line = line.strip()  # 去掉换行符
                     if not line:  # 如果是空行，跳过
                         continue
@@ -225,9 +237,21 @@ if __name__ == "__main__":
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
 
 
+
                     else:
-                        print(f"暂不支持的类型：{pixel_type}")
-                        return
+
+                        # 遇到非法像素类型，显示行号和行内容
+
+                        print(f"错误：第 {line_num} 行包含未知的像素类型 '{pixel_type}'")
+
+                        print(f"出错的内容：{line}")
+
+                        # 关闭图像窗口并退出程序
+
+                        img.close()  # 释放图片内存
+
+                        sys.exit()  # 退出程序
+
                     prev_r, prev_g, prev_b = r, g, b
                     # 更新历史颜色列表
                     if (r, g, b) not in colors:
