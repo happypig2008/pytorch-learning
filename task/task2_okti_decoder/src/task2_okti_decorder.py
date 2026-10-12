@@ -3,7 +3,8 @@
 # 程序说明：任务二 OKTI 图像解码器，第一阶段只读取文件头并解析尺寸
 import os
 import sys
-from PIL import Image
+from SimpleGraphics import *
+import _tkinter
 
 def read_header(filename):
     """
@@ -127,7 +128,7 @@ def main():
     if result is not None:
         w, h = result
         # 创建一个 w 宽 h 高的黑色画布
-        img = Image.new("RGB", (w, h), (0, 0, 0))
+        img = newImage(w, h)
         print(f"接下来应该解析 {w * h} 个像素的数据。")
         print("第一阶段测试通过！")
     else:
@@ -172,7 +173,7 @@ if __name__ == "__main__":
 
         if result is not None:
             w, h = result
-            img = Image.new("RGB", (w, h), (0, 0, 0))
+            img = createImage(w, h)
             total_pixels = w * h
             print(f"预计需要解析 {total_pixels} 个像素。")
 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
                         x = pixel_count % w
                         y = pixel_count // w
                         # 把颜色画上去
-                        img.putpixel((x, y), (r, g, b))
+                        putPixel(img, x, y, r, g, b)
                         pixel_count += 1
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
 
@@ -221,7 +222,7 @@ if __name__ == "__main__":
                         x = pixel_count % w
                         y = pixel_count // w
                         # 把颜色画上去
-                        img.putpixel((x, y), (r, g, b))
+                        putPixel(img, x, y, r, g, b)
 
                         pixel_count += 1
 
@@ -239,7 +240,7 @@ if __name__ == "__main__":
                             x = pixel_count % w
                             y = pixel_count // w
                             # 把颜色画上去
-                            img.putpixel((x, y), (r, g, b))
+                            putPixel(img, x, y, r, g, b)
                             pixel_count += 1
                             # 注意：这里打印用的是 prev_r，因为颜色没有变
                             print(f"像素 {pixel_count}: R={prev_r}, G={prev_g}, B={prev_b}")
@@ -252,7 +253,7 @@ if __name__ == "__main__":
                         r, g, b = parse_pixel_i(line, colors)
                         x = pixel_count % w
                         y = pixel_count // w
-                        img.putpixel((x, y), (r, g, b))
+                        putPixel(img, x, y, r, g, b)
                         pixel_count += 1
                         print(f"像素 {pixel_count}: R={r}, G={g}, B={b}")
 
@@ -268,7 +269,7 @@ if __name__ == "__main__":
 
                         # 关闭图像窗口并退出程序
 
-                        img.close()  # 释放图片内存
+                        close()  # 释放图片内存
 
                         sys.exit()  # 退出程序
 
@@ -278,8 +279,7 @@ if __name__ == "__main__":
                         colors.insert(0, (r, g, b))
                         if len(colors) > 256:
                             colors.pop()
-                img.save("output.png")  # 把图片保存到文件
-                img.show()  # 弹出一个窗口显示图片
+                drawImage(img, 0, 0)  # 这会弹出一个窗口显示图片
 
                 print(f"解析完毕，共处理 {pixel_count} 个像素。")
 
