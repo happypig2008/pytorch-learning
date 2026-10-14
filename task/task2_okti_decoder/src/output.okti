@@ -9,10 +9,10 @@ d808
 d808
 d808
 r7
-p00ff00
-pff0000
-pffffff
-p0000ff
-pffffff
+i6
+i7
+i4
+i5
+i4
 R1e
-p000000
+i8
