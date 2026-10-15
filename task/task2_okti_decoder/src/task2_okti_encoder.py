@@ -123,7 +123,11 @@ def encode_image(image, filename):
     colors = [(0, 0, 0)]  # 颜色列表，初始只有黑色
     x = 0
     y = 0
-
+    # 在 encode_image 函数开头定义计数器
+    count_p = 0
+    count_d = 0
+    count_r = 0
+    count_i = 0
     # 使用 with open 自动关闭文件
     with open(filename, "w", newline="\n") as out:
         out.write("okti\n")
@@ -141,12 +145,15 @@ def encode_image(image, filename):
                 while extra_copies > 0:
                     if extra_copies <= 15:
                         out.write("r%x\n" % extra_copies)
+                        count_r += 1
                         extra_copies = 0
                     elif extra_copies <= 255:
                         out.write("R%02x\n" % extra_copies)
+                        count_r += 1
                         extra_copies = 0
                     else:
                         out.write("Rff\n")
+                        count_r += 1
                         extra_copies -= 255
 
                 x, y = advance_position(x, y, run_length, width)
@@ -160,6 +167,7 @@ def encode_image(image, filename):
                     else:
                         out.write("I%02x\n" % index)
                     # 注意：已在列表里，不用 add_color 更新
+                    count_i += 1
 
                     previous_color = current_color
                     x += 1
@@ -175,18 +183,21 @@ def encode_image(image, filename):
 
                     if -8 <= dr <= 7 and -8 <= dg <= 7 and -8 <= db <= 7:
                         out.write("d%x%x%x\n" % (dr + 8, dg + 8, db + 8))
+                        count_d +=1
                         add_color(colors, current_color)  # 更新列表
                     else:
                         # 4. 只能用 p (完整RGB)
                         out.write("p%02x%02x%02x\n" % (current_color[0], current_color[1], current_color[2]))
+                        count_p += 1
                         add_color(colors, current_color)  # 更新列表
+
 
                     previous_color = current_color
                     x += 1
                     if x >= width:
                         x = 0
                         y += 1
-
+    print(f"编码统计: p={count_p}, d={count_d}, r/R={count_r}, i/I={count_i}")
 
 def main():
     """主程序：自动找图 -> 转换格式 -> 编码"""
@@ -214,7 +225,7 @@ def main():
 
     print("正在加载 PPM 图片并编码...")
     try:
-        image = loadImage(final_ppm_pa th)
+        image = loadImage(final_ppm_path)
 
         try:
             drawImage(image, 0, 0)
@@ -222,6 +233,15 @@ def main():
             print("提示：当前环境无显示器，跳过图片展示，直接开始编码。")
 
         encode_image(image, "output.okti")
+        # 压缩率统计（拓展功能）
+        try:
+            original_size = os.path.getsize(final_ppm_path)
+            compressed_size = os.path.getsize("output.okti")
+            if original_size > 0:
+                reduction = (original_size - compressed_size) / original_size * 100
+                print(f"原始大小: {original_size} 字节, 压缩后: {compressed_size} 字节, 缩减量: {reduction:.2f}%")
+        except Exception as e:
+            print("计算大小失败:", e)
         print("编码完成！已保存为 output.okti")
 
     except _tkinter.TclError:
