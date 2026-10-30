@@ -17,7 +17,8 @@
 在 `src` 目录下，通过终端执行以下命令：
 - 运行全连接网络（MLP）：`python train_mlp.py`
 - 运行卷积神经网络（CNN）：`python train_cnn.py`
-- 运行模糊鲁棒性测试：`python test_blur.py`
+- 运行模糊鲁棒性测试：`python test_blur.py
+- **运行任务四交互网页**：在 `task3_mnist` 根目录下执行 `python demo_app.py`，然后在浏览器打开 http://127.0.0.1:7860`
 
 运行结束后，模型权重与 Loss 曲线图会自动保存至 `../outputs/` 目录下。
 
@@ -33,5 +34,6 @@ task3_mnist/
 │   └── test_blur.py     # 拓展：高斯模糊测试
 └── README.md            # 项目说明
 ```
+
 
 
